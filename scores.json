@@ -1,0 +1,18 @@
+{
+  "v": 1,
+  "updated": "2026-11-05T12:42:03.862Z",
+  "players": {
+    "asisteus-cell": {
+      "name": "asisteus-cell",
+      "anon": false,
+      "score": 540,
+      "wave": 4,
+      "kills": 21,
+      "achievements": 0,
+      "mode": "campaign-regular",
+      "build": "s1-574f842",
+      "date": "2026-11-05T12:42:03.862Z",
+      "issue": 1
+    }
+  }
+}
