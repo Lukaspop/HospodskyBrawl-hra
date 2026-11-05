@@ -1,6 +1,6 @@
 {
   "v": 1,
-  "updated": "2026-11-05T12:42:03.862Z",
+  "updated": "2026-11-05T12:43:16.213Z",
   "players": {
     "asisteus-cell": {
       "name": "asisteus-cell",
@@ -13,6 +13,18 @@
       "build": "s1-574f842",
       "date": "2026-11-05T12:42:03.862Z",
       "issue": 1
+    },
+    "lukaspop": {
+      "name": "Lukaspop",
+      "anon": false,
+      "score": 305,
+      "wave": 3,
+      "kills": 9,
+      "achievements": 0,
+      "mode": "normal",
+      "build": "s1-574f842",
+      "date": "2026-11-05T12:43:16.213Z",
+      "issue": 2
     }
   }
 }
