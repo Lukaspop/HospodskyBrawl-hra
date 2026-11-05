@@ -1,0 +1,66 @@
+# Síň slávy party Hospodského brawlu. Hra posílá skóre jako issue s titulkem „Skóre: …“.
+# Workflow přečte všechna otevřená issues se skóre, zapíše je do scores.json (jeden řádek
+# na hráče), commitne, každé issue okomentuje a zavře.
+#
+# Soubor patří do veřejného repa Lukaspop/HospodskyBrawl-hra a kopíruje ho tam
+# `npm run deploy:web` ze soukromého repa (popovyBejkarny/scripts/web/public-repo/).
+# Úpravy dělej tam, tady by je další nasazení přepsalo.
+name: Síň slávy
+
+on:
+  issues:
+    types: [opened]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+
+# Zápisy jdou po jednom. Čekající běh, který se ve frontě nahradí novějším, nevadí:
+# každý běh zpracuje všechna otevřená issues se skóre.
+concurrency:
+  group: scores
+  cancel-in-progress: false
+
+jobs:
+  scores:
+    if: github.event_name == 'workflow_dispatch' || startsWith(github.event.issue.title, 'Skóre:')
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Zapsat skóre
+        run: |
+          gh issue list --repo "$GITHUB_REPOSITORY" --state open --limit 200 \
+            --json number,title,body,author > "$RUNNER_TEMP/issues.json"
+          node .github/scripts/scores.mjs --issues "$RUNNER_TEMP/issues.json" \
+            --scores scores.json --results "$RUNNER_TEMP/results.json"
+      - name: Commit scores.json
+        run: |
+          git add scores.json 2>/dev/null || true
+          if git diff --cached --quiet; then
+            echo "scores.json beze změny."
+            exit 0
+          fi
+          git config user.name "Síň slávy (Actions)"
+          git config user.email "actions@users.noreply.github.com"
+          git commit -m "Síň slávy: nové skóre"
+          # Mezitím mohlo přijít nasazení nové verze hry (scores.json nemění).
+          for attempt in 1 2 3 4 5; do
+            if git push; then exit 0; fi
+            git pull --rebase
+          done
+          echo "::error::scores.json se nepodařilo pushnout."
+          exit 1
+      - name: Okomentovat a zavřít issues
+        run: |
+          jq -c '.[]' "$RUNNER_TEMP/results.json" | while read -r result; do
+            number=$(jq -r '.number' <<< "$result")
+            jq -r '.message' <<< "$result" > "$RUNNER_TEMP/comment.md"
+            gh issue comment "$number" --repo "$GITHUB_REPOSITORY" --body-file "$RUNNER_TEMP/comment.md" || true
+            gh issue close "$number" --repo "$GITHUB_REPOSITORY" || true
+          done

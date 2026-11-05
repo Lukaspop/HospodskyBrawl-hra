@@ -111,6 +111,8 @@ async function decryptManifest(key, blob) {
 
 
 const LOADER_FILES = new Set(["index.html","loader.js","sw.js","params.json","manifest.bin","404.html",".nojekyll"])
+// Veřejná nešifrovaná data (žebříček síně slávy scores.json): rovnou na síť, i bez přihlášení.
+const PUBLIC_FILES = new Set(["scores.json"])
 const BLOB_DIR = 'x/'
 const SCOPE = new URL(self.registration.scope)
 const DB_NAME = 'hb-web'
@@ -386,5 +388,6 @@ self.addEventListener('fetch', (event) => {
   if (path === '' || path.endsWith('/')) path += 'index.html'
   // Soubory loaderu a zašifrované bloby servíruje přímo server.
   if (path !== 'index.html' && (LOADER_FILES.has(path) || path.startsWith(BLOB_DIR))) return
+  if (PUBLIC_FILES.has(path)) return
   event.respondWith(handle(request, path))
 })
