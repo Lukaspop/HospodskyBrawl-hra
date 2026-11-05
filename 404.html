@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="cs">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Tady nic není</title>
+    <style>
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+        background: #120b07;
+        color: #f3e6cc;
+        font:
+          16px/1.5 system-ui,
+          -apple-system,
+          'Segoe UI',
+          sans-serif;
+        text-align: center;
+      }
+      a {
+        color: #f4cd72;
+      }
+    </style>
+  </head>
+  <body>
+    <p>Tady nic není. <a id="home" href="/">Zpátky do hospůdky</a></p>
+    <script>
+      // Web na GitHub Pages leží v podsložce (/název-repa/), odkaz vede do ní.
+      var parts = location.pathname.split('/')
+      if (parts.length > 2 && parts[1]) document.getElementById('home').href = '/' + parts[1] + '/'
+    </script>
+  </body>
+</html>

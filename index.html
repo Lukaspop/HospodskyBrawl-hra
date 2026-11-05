@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="cs">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Hospůdka U Pumbyče</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Roboto+Slab:wght@800&display=swap"
+    />
+    <style>
+      :root {
+        --bg: #120b07;
+        --wood-900: #1d120a;
+        --wood-700: #3b2414;
+        --brass: #d9a441;
+        --brass-light: #f4cd72;
+        --brass-dark: #8c5f1d;
+        --text: #f3e6cc;
+        --muted: #c0a984;
+        --red: #ff8a73;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        min-height: 100%;
+        background: radial-gradient(circle at 50% 30%, #2a190e, var(--bg) 70%);
+        color: var(--text);
+        font:
+          15px/1.45 'Inter',
+          system-ui,
+          -apple-system,
+          'Segoe UI',
+          sans-serif;
+      }
+      main {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px 16px;
+      }
+      form {
+        width: 100%;
+        max-width: 380px;
+        padding: 28px 24px;
+        background: linear-gradient(180deg, var(--wood-700), var(--wood-900));
+        border: 2px solid var(--brass-dark);
+        border-radius: 12px;
+        box-shadow: 0 24px 70px rgba(0, 0, 0, 0.65);
+      }
+      .beer {
+        font-size: 44px;
+        text-align: center;
+        line-height: 1;
+      }
+      h1 {
+        margin: 12px 0 20px;
+        font:
+          800 22px/1.25 'Roboto Slab',
+          Georgia,
+          serif;
+        color: var(--brass-light);
+        text-align: center;
+      }
+      label {
+        display: block;
+        margin: 14px 0 6px;
+        font-weight: 600;
+        color: var(--muted);
+      }
+      input {
+        width: 100%;
+        padding: 10px 12px;
+        font: inherit;
+        color: var(--text);
+        background: #140c06;
+        border: 2px solid var(--brass-dark);
+        border-radius: 8px;
+      }
+      input:focus-visible,
+      button:focus-visible {
+        outline: 3px solid #f7eedb;
+        outline-offset: 2px;
+      }
+      button {
+        width: 100%;
+        margin-top: 22px;
+        min-height: 46px;
+        font: inherit;
+        font-size: 17px;
+        font-weight: 700;
+        color: #2a1505;
+        background: linear-gradient(180deg, var(--brass-light), var(--brass) 55%, #b9802a);
+        border: 2px solid #6f4612;
+        border-radius: 8px;
+        cursor: pointer;
+      }
+      button:disabled {
+        opacity: 0.6;
+        cursor: progress;
+      }
+      .message {
+        min-height: 1.45em;
+        margin: 14px 0 0;
+        text-align: center;
+        color: var(--muted);
+      }
+      .message.error {
+        color: var(--red);
+        font-weight: 600;
+      }
+      .hidden {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <form id="login" class="hidden" autocomplete="on">
+        <div class="beer" aria-hidden="true">🍺</div>
+        <h1>Hospůdka U Pumbyče je jen pro štamgasty</h1>
+        <label for="name">Jméno</label>
+        <input
+          id="name"
+          name="username"
+          autocomplete="username"
+          autocapitalize="off"
+          spellcheck="false"
+          required
+        />
+        <label for="password">Heslo</label>
+        <input
+          id="password"
+          name="password"
+          type="password"
+          autocomplete="current-password"
+          required
+        />
+        <button id="submit" type="submit">Vstoupit</button>
+        <p id="message" class="message" role="status" aria-live="polite"></p>
+      </form>
+      <p id="boot" class="message">Točí se pivo…</p>
+      <noscript><p class="message error">Bez JavaScriptu se dovnitř nedostaneš.</p></noscript>
+    </main>
+    <script src="./loader.js"></script>
+  </body>
+</html>
