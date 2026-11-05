@@ -1,6 +1,6 @@
 # Síň slávy party Hospodského brawlu. Hra posílá skóre jako issue s titulkem „Skóre: …“.
-# Workflow přečte všechna otevřená issues se skóre, zapíše je do scores.json (jeden řádek
-# na hráče), commitne, každé issue okomentuje a zavře.
+# Workflow přečte všechna otevřená issues se skóre, zapíše je do scores.json (nejlepší
+# run na hráče a režim, počet runů hráče), commitne, každé issue okomentuje a zavře.
 #
 # Soubor patří do veřejného repa Lukaspop/HospodskyBrawl-hra a kopíruje ho tam
 # `npm run deploy:web` ze soukromého repa (popovyBejkarny/scripts/web/public-repo/).
