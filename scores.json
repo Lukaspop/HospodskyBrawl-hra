@@ -1,30 +1,100 @@
 {
-  "v": 1,
-  "updated": "2026-11-05T12:43:16.213Z",
+  "v": 3,
+  "updated": "2026-11-10T11:24:30.042Z",
   "players": {
     "asisteus-cell": {
       "name": "asisteus-cell",
       "anon": false,
-      "score": 540,
-      "wave": 4,
-      "kills": 21,
       "achievements": 0,
-      "mode": "campaign-regular",
-      "build": "s1-574f842",
-      "date": "2026-11-05T12:42:03.862Z",
-      "issue": 1
+      "runs": 2,
+      "last": "2026-11-05T16:47:26.000Z"
     },
     "lukaspop": {
       "name": "Lukaspop",
       "anon": false,
+      "achievements": 0,
+      "runs": 1,
+      "last": "2026-11-05T12:43:16.213Z"
+    },
+    "lordelznic": {
+      "name": "LordElznic",
+      "anon": false,
+      "achievements": 12,
+      "runs": 1,
+      "last": "2026-11-05T13:35:13.000Z"
+    }
+  },
+  "records": {
+    "asisteus-cell|campaign-regular|0.x": {
+      "player": "asisteus-cell",
+      "mode": "campaign-regular",
+      "version": "0.x",
+      "score": 540,
+      "wave": 4,
+      "kills": 21,
+      "bosses": 0,
+      "megaboss": false,
+      "time": null,
+      "earned": null,
+      "golden": null,
+      "build": "s1-574f842",
+      "date": "2026-11-05T12:42:03.862Z",
+      "issue": 1
+    },
+    "lukaspop|endless-normal|0.x": {
+      "player": "lukaspop",
+      "mode": "endless-normal",
+      "version": "0.x",
       "score": 305,
       "wave": 3,
       "kills": 9,
-      "achievements": 0,
-      "mode": "normal",
+      "bosses": 0,
+      "megaboss": false,
+      "time": null,
+      "earned": null,
+      "golden": null,
       "build": "s1-574f842",
       "date": "2026-11-05T12:43:16.213Z",
       "issue": 2
+    },
+    "lordelznic|endless-normal|0.x": {
+      "player": "lordelznic",
+      "mode": "endless-normal",
+      "version": "0.x",
+      "score": 8030,
+      "wave": 18,
+      "kills": 330,
+      "bosses": 3,
+      "megaboss": true,
+      "time": null,
+      "earned": null,
+      "golden": null,
+      "build": "s1-dab76e7",
+      "date": "2026-11-05T13:35:13.000Z",
+      "issue": 4
+    },
+    "asisteus-cell|endless-regular|0.x": {
+      "player": "asisteus-cell",
+      "mode": "endless-regular",
+      "version": "0.x",
+      "score": 25440,
+      "wave": 41,
+      "kills": 1185,
+      "bosses": 0,
+      "megaboss": false,
+      "time": null,
+      "earned": null,
+      "golden": null,
+      "build": "s1-574f842",
+      "date": "2026-11-05T16:47:26.000Z",
+      "issue": 5
     }
-  }
+  },
+  "processed": [
+    1,
+    2,
+    3,
+    4,
+    5
+  ]
 }
