@@ -32,7 +32,17 @@
     <script>
       // Web na GitHub Pages leží v podsložce (/název-repa/), odkaz vede do ní.
       var parts = location.pathname.split('/')
-      if (parts.length > 2 && parts[1]) document.getElementById('home').href = '/' + parts[1] + '/'
+      if (parts.length > 2 && parts[1]) {
+        var home = '/' + parts[1] + '/'
+        document.getElementById('home').href = home
+        // Bez Service Workeru (první návštěva, jiný prohlížeč) server zná jen loader. Adresa
+        // uvnitř webu proto vede na přihlášení, které se pak vrátí sem (parametr next).
+        // Složka zašifrovaných blobů ne, ta by se točila v kruhu.
+        var rest = location.pathname.slice(home.length)
+        if (rest && !/^x(\/|$)/.test(rest)) {
+          location.replace(home + '?next=' + encodeURIComponent(rest))
+        }
+      }
     </script>
   </body>
 </html>

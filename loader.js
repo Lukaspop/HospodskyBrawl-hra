@@ -1,12 +1,14 @@
 // Přihlašovací loader šifrované verze hry. Šablona: build (scripts/web/encrypt.mjs) sem
-// místo značky níže vloží sdílené funkce z crypto-core.mjs.
+// místo značky níže vloží sdílené funkce z crypto-core.mjs a site-core.mjs.
 //
 // Postup: jméno + heslo → PBKDF2 → klíč AES-GCM → zkusí dešifrovat manifest (špatné údaje
 // = chyba ověření GCM) → zaregistruje Service Worker (sw.js), předá mu klíč a přejde na
 // adresu webu. Service Worker pak hru dešifruje a servíruje místo tohoto loaderu.
+// S parametrem `next` (poslal ho sem Service Worker nebo stránka 404) se po přihlášení
+// vrátí na tu cestu webu místo do hry.
 // Klíč (ne heslo) si pamatuje v localStorage, odhlášení přes adresu s `?logout`.
 
-/* global base64ToBytes, bytesToBase64, decryptManifest, deriveRawKey, importAesKey */
+/* global base64ToBytes, bytesToBase64, decryptManifest, deriveRawKey, importAesKey, safeNextPath */
 ;(() => {
   'use strict'
 
@@ -110,6 +112,64 @@ async function decryptManifest(key, blob) {
   return JSON.parse(new TextDecoder().decode(plain))
 }
 
+// Společná pravidla adres šifrovaného webu (npm run build:web): Service Worker podle nich
+// hledá soubor v manifestu, loader podle nich ověří, kam se po přihlášení vrátit.
+//
+// Stejně jako crypto-core.mjs ho build vloží do `loader.js` a `sw.js` jako text a odstraní
+// slova `export`, proto tu smí být jen deklarace funkcí a konstant bez importů. Loader je
+// veřejný: komentáře ani kód tu nesmí prozradit názvy souborů a složek webu.
+
+/** Nejdelší přijatá cesta návratu po přihlášení (parametr `next`). */
+const NEXT_MAX_LENGTH = 512
+
+/**
+ * Najde v manifestu soubor pro cestu `path` (relativní ke kořeni webu, dekódovaná, u složky
+ * s doplněným `index.html`). `files` je seznam souborů z manifestu.
+ *
+ * Vrátí `{ file }` (soubor k vrácení), `{ redirect }` (relativní cesta, kam přesměrovat:
+ * stránka bez `.html` nebo složka bez lomítka na konci), `{ file, status: 404 }` (stránka
+ * 404.html nejbližší nadřazené podsložky) nebo `null` (nic takového není). Přesměrování
+ * a stránku 404 dostane jen navigace, požadavky na soubory jen přesnou shodu.
+ */
+function resolveSitePath(files, path, isNavigation) {
+  const has = (rel) => Object.prototype.hasOwnProperty.call(files, rel)
+  if (has(path)) return { file: path }
+  if (!isNavigation || !path) return null
+  if (!path.endsWith('/index.html')) {
+    if (has(`${path}.html`)) return { redirect: `${path}.html` }
+    if (has(`${path}/index.html`)) return { redirect: `${path}/` }
+  }
+  const parts = path.split('/')
+  for (let i = parts.length - 1; i > 0; i--) {
+    const notFound = `${parts.slice(0, i).join('/')}/404.html`
+    if (has(notFound)) return { file: notFound, status: 404 }
+  }
+  return null
+}
+
+/**
+ * Ověří cíl návratu po přihlášení (parametr `next`, cesta relativní ke kořeni webu, jak ji
+ * poslal Service Worker nebo stránka 404). Pustí jen obyčejnou cestu uvnitř webu: žádné
+ * schéma, `//`, `..` (ani zakódované), dotaz nebo kotvu a nic ze složky zašifrovaných blobů.
+ * Vrátí cestu, nebo prázdný řetězec.
+ */
+function safeNextPath(next) {
+  if (typeof next !== 'string' || !next || next.length > NEXT_MAX_LENGTH) return ''
+  if (!/^[A-Za-z0-9._~%@-][A-Za-z0-9._~%@/-]*$/.test(next)) return ''
+  let decoded
+  try {
+    decoded = decodeURIComponent(next)
+  } catch {
+    return ''
+  }
+  for (const text of [next, decoded]) {
+    if (text.includes('//') || text.includes('\\') || text.startsWith('/')) return ''
+    if (text.split('/').some((part) => part === '.' || part === '..')) return ''
+    if (/^x(\/|$)/.test(text)) return ''
+  }
+  return next
+}
+
 
   const STORAGE_KEY = 'hb-web:key'
   const ENTER_KEY = 'hb-web:entering'
@@ -123,6 +183,15 @@ async function decryptManifest(key, blob) {
   const message = byId('message')
   const boot = byId('boot')
   const siteUrl = new URL('./', location.href)
+
+  /** Kam po přihlášení: cesta z parametru `next` uvnitř webu, jinak hra. */
+  function targetUrl() {
+    const next = safeNextPath(new URL(location.href).searchParams.get('next') || '')
+    if (!next) return siteUrl
+    const url = new URL(next, siteUrl)
+    const inside = url.origin === siteUrl.origin && url.pathname.startsWith(siteUrl.pathname)
+    return inside ? url : siteUrl
+  }
 
   function setMessage(text, isError) {
     message.textContent = text
@@ -228,7 +297,7 @@ async function decryptManifest(key, blob) {
     } catch {
       // Viz výše.
     }
-    location.replace(siteUrl.href)
+    location.replace(targetUrl().href)
   }
 
   // Service Worker po restartu (prohlížeč ho uspí) může klíč požádat znovu.

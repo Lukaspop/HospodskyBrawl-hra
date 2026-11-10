@@ -1,10 +1,13 @@
 # Síň slávy party Hospodského brawlu. Hra posílá skóre jako issue s titulkem „Skóre: …“.
-# Workflow přečte všechna otevřená issues se skóre, zapíše je do scores.json (nejlepší
-# run na hráče a režim, počet runů hráče), commitne, každé issue okomentuje a zavře.
+# Workflow přečte poslední issues se skóre (otevřená i zavřená: hráči je často hned
+# zavřou sami), ty dosud nezpracované (podle `processed` v scores.json) zapíše do
+# scores.json (nejlepší run na hráče, kategorii a verzi hry, počet runů hráče), commitne,
+# každé okomentuje a zavře.
 #
 # Soubor patří do veřejného repa Lukaspop/HospodskyBrawl-hra a kopíruje ho tam
-# `npm run deploy:web` ze soukromého repa (popovyBejkarny/scripts/web/public-repo/).
-# Úpravy dělej tam, tady by je další nasazení přepsalo.
+# `npm run deploy:web` ze soukromého repa (popovyBejkarny/scripts/web/public-repo/),
+# stejně jako .github/scripts/scores.mjs a scores-core.mjs. Úpravy dělej tam, tady by je
+# další nasazení přepsalo.
 name: Síň slávy
 
 on:
@@ -17,7 +20,7 @@ permissions:
   issues: write
 
 # Zápisy jdou po jednom. Čekající běh, který se ve frontě nahradí novějším, nevadí:
-# každý běh zpracuje všechna otevřená issues se skóre.
+# každý běh zpracuje všechna dosud nezpracovaná issues se skóre.
 concurrency:
   group: scores
   cancel-in-progress: false
@@ -35,8 +38,9 @@ jobs:
           node-version: 24
       - name: Zapsat skóre
         run: |
-          gh issue list --repo "$GITHUB_REPOSITORY" --state open --limit 200 \
-            --json number,title,body,author > "$RUNNER_TEMP/issues.json"
+          # Bez --search: vyhledávání má zpoždění indexu a čerstvé issue by minulo.
+          gh issue list --repo "$GITHUB_REPOSITORY" --state all --limit 300 \
+            --json number,title,body,author,createdAt > "$RUNNER_TEMP/issues.json"
           node .github/scripts/scores.mjs --issues "$RUNNER_TEMP/issues.json" \
             --scores scores.json --results "$RUNNER_TEMP/results.json"
       - name: Commit scores.json

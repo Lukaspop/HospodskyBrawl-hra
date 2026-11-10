@@ -1,13 +1,16 @@
 // Service Worker šifrované verze hry. Šablona: build (scripts/web/encrypt.mjs) sem vloží
-// sdílené funkce z crypto-core.mjs a seznam souborů loaderu.
+// sdílené funkce z crypto-core.mjs a site-core.mjs a seznam souborů loaderu.
 //
 // Zachytává požadavky na soubory webu, stáhne odpovídající zašifrovaný blob (x/<hex>.bin),
 // dešifruje ho a vrátí se správným Content-Type. Rozsahy (Range) vrací jako 206, aby
 // <audio> fungovalo i v Safari. Dešifrované soubory drží v paměti po dobu běhu workeru.
-// Bez klíče pouští adresu webu na síť, kde je přihlašovací loader.
+// Bez klíče pouští adresu webu na síť, kde je přihlašovací loader. Navigaci jinam pošle na
+// loader s parametrem `next`, aby se po přihlášení vrátila tam, kam uživatel mířil.
+// Podsložky webu můžou být samostatné statické weby (stránky .html, index.html ve složkách,
+// vlastní 404.html), pravidla adres jsou v site-core.mjs.
 'use strict'
 
-/* global base64ToBytes, decryptBytes, decryptManifest, fileAad, importAesKey */
+/* global base64ToBytes, decryptBytes, decryptManifest, fileAad, importAesKey, resolveSitePath */
 
 // Společné šifrování pro verzi hry na webu (npm run build:web).
 //
@@ -107,6 +110,64 @@ async function decryptBytes(key, blob, aad) {
 async function decryptManifest(key, blob) {
   const plain = await decryptBytes(key, blob, MANIFEST_AAD)
   return JSON.parse(new TextDecoder().decode(plain))
+}
+
+// Společná pravidla adres šifrovaného webu (npm run build:web): Service Worker podle nich
+// hledá soubor v manifestu, loader podle nich ověří, kam se po přihlášení vrátit.
+//
+// Stejně jako crypto-core.mjs ho build vloží do `loader.js` a `sw.js` jako text a odstraní
+// slova `export`, proto tu smí být jen deklarace funkcí a konstant bez importů. Loader je
+// veřejný: komentáře ani kód tu nesmí prozradit názvy souborů a složek webu.
+
+/** Nejdelší přijatá cesta návratu po přihlášení (parametr `next`). */
+const NEXT_MAX_LENGTH = 512
+
+/**
+ * Najde v manifestu soubor pro cestu `path` (relativní ke kořeni webu, dekódovaná, u složky
+ * s doplněným `index.html`). `files` je seznam souborů z manifestu.
+ *
+ * Vrátí `{ file }` (soubor k vrácení), `{ redirect }` (relativní cesta, kam přesměrovat:
+ * stránka bez `.html` nebo složka bez lomítka na konci), `{ file, status: 404 }` (stránka
+ * 404.html nejbližší nadřazené podsložky) nebo `null` (nic takového není). Přesměrování
+ * a stránku 404 dostane jen navigace, požadavky na soubory jen přesnou shodu.
+ */
+function resolveSitePath(files, path, isNavigation) {
+  const has = (rel) => Object.prototype.hasOwnProperty.call(files, rel)
+  if (has(path)) return { file: path }
+  if (!isNavigation || !path) return null
+  if (!path.endsWith('/index.html')) {
+    if (has(`${path}.html`)) return { redirect: `${path}.html` }
+    if (has(`${path}/index.html`)) return { redirect: `${path}/` }
+  }
+  const parts = path.split('/')
+  for (let i = parts.length - 1; i > 0; i--) {
+    const notFound = `${parts.slice(0, i).join('/')}/404.html`
+    if (has(notFound)) return { file: notFound, status: 404 }
+  }
+  return null
+}
+
+/**
+ * Ověří cíl návratu po přihlášení (parametr `next`, cesta relativní ke kořeni webu, jak ji
+ * poslal Service Worker nebo stránka 404). Pustí jen obyčejnou cestu uvnitř webu: žádné
+ * schéma, `//`, `..` (ani zakódované), dotaz nebo kotvu a nic ze složky zašifrovaných blobů.
+ * Vrátí cestu, nebo prázdný řetězec.
+ */
+function safeNextPath(next) {
+  if (typeof next !== 'string' || !next || next.length > NEXT_MAX_LENGTH) return ''
+  if (!/^[A-Za-z0-9._~%@-][A-Za-z0-9._~%@/-]*$/.test(next)) return ''
+  let decoded
+  try {
+    decoded = decodeURIComponent(next)
+  } catch {
+    return ''
+  }
+  for (const text of [next, decoded]) {
+    if (text.includes('//') || text.includes('\\') || text.startsWith('/')) return ''
+    if (text.split('/').some((part) => part === '.' || part === '..')) return ''
+    if (/^x(\/|$)/.test(text)) return ''
+  }
+  return next
 }
 
 
@@ -256,7 +317,7 @@ function decryptFile(path, entry) {
       const response = await fetch(new URL(`${BLOB_DIR}${entry.b}.bin`, SCOPE))
       if (!response.ok) throw new Error(`${path}: ${response.status}`)
       const plain = await decryptBytes(key, await response.arrayBuffer(), fileAad(path))
-      return path === state.manifest.entry ? injectKeyHelper(plain) : plain
+      return entry.t.startsWith('text/html') ? injectKeyHelper(plain) : plain
     })()
     promise.catch(() => state.files.delete(path))
     state.files.set(path, promise)
@@ -265,8 +326,8 @@ function decryptFile(path, entry) {
 }
 
 /**
- * Do index.html hry vloží malý skript, který Service Workeru po restartu podá klíč
- * z localStorage (hra sama o šifrování neví).
+ * Do každé stránky HTML vloží malý skript, který Service Workeru po restartu podá klíč
+ * z localStorage (hra ani ostatní stránky o šifrování nevědí).
  */
 function injectKeyHelper(bytes) {
   const html = new TextDecoder().decode(bytes)
@@ -286,8 +347,8 @@ function textResponse(status, text) {
   })
 }
 
-/** Odpověď na požadavek s hlavičkou Range (206), nebo celý soubor (200). */
-function fileResponse(request, bytes, contentType) {
+/** Odpověď na požadavek s hlavičkou Range (206), nebo celý soubor (200, případně `status`). */
+function fileResponse(request, bytes, contentType, status = 200) {
   const size = bytes.length
   const headers = {
     'Content-Type': contentType,
@@ -324,27 +385,45 @@ function fileResponse(request, bytes, contentType) {
     })
   }
   return new Response(head ? null : bytes, {
-    status: 200,
+    status,
     headers: { ...headers, 'Content-Length': String(size) },
   })
 }
 
-async function handle(request, path) {
+/** Adresa loaderu, který se po přihlášení vrátí na `rel` (zakódovaná cesta od kořene webu). */
+function loginUrl(rel) {
+  const url = new URL(SCOPE.href)
+  if (rel) url.searchParams.set('next', rel)
+  return url.href
+}
+
+/** Zakóduje relativní cestu do adresy (po segmentech). */
+function encodePath(rel) {
+  return rel.split('/').map(encodeURIComponent).join('/')
+}
+
+async function handle(request, path, rel) {
   const isNavigation = request.mode === 'navigate'
   if (!(await ensureKey())) {
     // Nepřihlášený: adresa webu ukáže loader, ostatní nic.
     if (path === 'index.html') return fetch(request)
-    if (isNavigation) return Response.redirect(SCOPE.href, 302)
+    if (isNavigation) return Response.redirect(loginUrl(rel), 302)
     return textResponse(403, 'Nepřihlášeno')
   }
-  if (isNavigation && path === state.manifest.entry) {
+  if (isNavigation) {
+    // Každá navigace ověří, jestli mezitím nevyšla nová verze (jiné bloby v manifestu).
     const valid = await refreshManifest().catch(() => true)
-    if (!valid) return fetch(request)
+    if (!valid) {
+      if (path === 'index.html') return fetch(request)
+      return Response.redirect(loginUrl(rel), 302)
+    }
   }
-  const entry = state.manifest.files[path]
-  if (!entry) return textResponse(404, 'Nenalezeno')
+  const found = resolveSitePath(state.manifest.files, path, isNavigation)
+  if (!found) return textResponse(404, 'Nenalezeno')
+  if (found.redirect) return Response.redirect(new URL(encodePath(found.redirect), SCOPE).href, 302)
+  const entry = state.manifest.files[found.file]
   try {
-    return fileResponse(request, await decryptFile(path, entry), entry.t)
+    return fileResponse(request, await decryptFile(found.file, entry), entry.t, found.status)
   } catch (error) {
     console.error(error)
     return textResponse(500, 'Soubor se nepodařilo dešifrovat')
@@ -379,9 +458,10 @@ self.addEventListener('fetch', (event) => {
   // Cizí servery (Google Fonts) a adresy mimo web jdou rovnou na síť.
   if (url.origin !== SCOPE.origin || !url.pathname.startsWith(SCOPE.pathname)) return
   if (url.searchParams.has('logout')) return
+  const rel = url.pathname.slice(SCOPE.pathname.length)
   let path
   try {
-    path = decodeURIComponent(url.pathname.slice(SCOPE.pathname.length))
+    path = decodeURIComponent(rel)
   } catch {
     return
   }
@@ -389,5 +469,5 @@ self.addEventListener('fetch', (event) => {
   // Soubory loaderu a zašifrované bloby servíruje přímo server.
   if (path !== 'index.html' && (LOADER_FILES.has(path) || path.startsWith(BLOB_DIR))) return
   if (PUBLIC_FILES.has(path)) return
-  event.respondWith(handle(request, path))
+  event.respondWith(handle(request, path, rel))
 })

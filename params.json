@@ -2,6 +2,6 @@
   "v": 1,
   "kdf": "PBKDF2-SHA256",
   "iterations": 600000,
-  "salt": "wGNei9oD9N/9TJWx5bHf+g==",
+  "salt": "CER4wnIv9cEKuaeoMv27cw==",
   "cipher": "AES-256-GCM"
 }
