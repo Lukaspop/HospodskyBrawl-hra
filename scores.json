@@ -1,6 +1,6 @@
 {
   "v": 3,
-  "updated": "2026-11-11T17:41:45.647Z",
+  "updated": "2026-11-11T19:37:32.819Z",
   "players": {
     "asisteus-cell": {
       "name": "asisteus-cell",
@@ -57,6 +57,13 @@
       "achievements": 17,
       "runs": 1,
       "last": "2026-11-11T16:42:44.000Z"
+    },
+    "anon:zkurvený negr": {
+      "name": "zkurvený negr",
+      "anon": true,
+      "achievements": 1,
+      "runs": 1,
+      "last": "2026-11-11T19:37:17.000Z"
     }
   },
   "records": {
@@ -219,6 +226,22 @@
       "build": "s2-078970e",
       "date": "2026-11-11T17:41:32.000Z",
       "issue": 11
+    },
+    "anon:zkurvený negr|endless-normal|0.4": {
+      "player": "anon:zkurvený negr",
+      "mode": "endless-normal",
+      "version": "0.4.0",
+      "score": 830,
+      "wave": 5,
+      "kills": 26,
+      "bosses": 0,
+      "megaboss": false,
+      "time": 437,
+      "earned": 1170,
+      "golden": false,
+      "build": "s2-0c84b30",
+      "date": "2026-11-11T19:37:17.000Z",
+      "issue": 12
     }
   },
   "processed": [
@@ -232,6 +255,7 @@
     8,
     9,
     10,
-    11
+    11,
+    12
   ]
 }
