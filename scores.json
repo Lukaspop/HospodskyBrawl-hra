@@ -1,6 +1,6 @@
 {
   "v": 3,
-  "updated": "2026-11-11T02:48:02.254Z",
+  "updated": "2026-11-11T10:23:56.988Z",
   "players": {
     "asisteus-cell": {
       "name": "asisteus-cell",
@@ -36,6 +36,13 @@
       "achievements": 25,
       "runs": 1,
       "last": "2026-11-11T02:47:49.000Z"
+    },
+    "anon:johnny": {
+      "name": "Johnny",
+      "anon": true,
+      "achievements": 17,
+      "runs": 1,
+      "last": "2026-11-11T10:23:44.000Z"
     }
   },
   "records": {
@@ -134,6 +141,22 @@
       "build": "s2-b1ac8cf",
       "date": "2026-11-11T02:47:49.000Z",
       "issue": 7
+    },
+    "anon:johnny|endless-regular|0.4": {
+      "player": "anon:johnny",
+      "mode": "endless-regular",
+      "version": "0.4.0",
+      "score": 4635,
+      "wave": 12,
+      "kills": 175,
+      "bosses": 2,
+      "megaboss": false,
+      "time": 1154,
+      "earned": 7322,
+      "golden": false,
+      "build": "s2-c72df68",
+      "date": "2026-11-11T10:23:44.000Z",
+      "issue": 8
     }
   },
   "processed": [
@@ -143,6 +166,7 @@
     4,
     5,
     6,
-    7
+    7,
+    8
   ]
 }
