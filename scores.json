@@ -1,6 +1,6 @@
 {
   "v": 3,
-  "updated": "2026-11-11T12:15:02.126Z",
+  "updated": "2026-11-11T16:43:01.225Z",
   "players": {
     "asisteus-cell": {
       "name": "asisteus-cell",
@@ -50,6 +50,13 @@
       "achievements": 6,
       "runs": 1,
       "last": "2026-11-11T12:14:48.000Z"
+    },
+    "anon:mizejcik": {
+      "name": "MizejciK",
+      "anon": true,
+      "achievements": 17,
+      "runs": 1,
+      "last": "2026-11-11T16:42:44.000Z"
     }
   },
   "records": {
@@ -180,6 +187,22 @@
       "build": "s2-c72df68",
       "date": "2026-11-11T12:14:48.000Z",
       "issue": 9
+    },
+    "anon:mizejcik|endless-hard|0.4": {
+      "player": "anon:mizejcik",
+      "mode": "endless-hard",
+      "version": "0.4.0",
+      "score": 13555,
+      "wave": 23,
+      "kills": 504,
+      "bosses": 4,
+      "megaboss": true,
+      "time": 2805,
+      "earned": 34727,
+      "golden": false,
+      "build": "s2-078970e",
+      "date": "2026-11-11T16:42:44.000Z",
+      "issue": 10
     }
   },
   "processed": [
@@ -191,6 +214,7 @@
     6,
     7,
     8,
-    9
+    9,
+    10
   ]
 }
