@@ -1,6 +1,6 @@
 {
   "v": 3,
-  "updated": "2026-11-11T10:23:56.988Z",
+  "updated": "2026-11-11T12:15:02.126Z",
   "players": {
     "asisteus-cell": {
       "name": "asisteus-cell",
@@ -43,6 +43,13 @@
       "achievements": 17,
       "runs": 1,
       "last": "2026-11-11T10:23:44.000Z"
+    },
+    "anon:lukas test": {
+      "name": "lukas test",
+      "anon": true,
+      "achievements": 6,
+      "runs": 1,
+      "last": "2026-11-11T12:14:48.000Z"
     }
   },
   "records": {
@@ -157,6 +164,22 @@
       "build": "s2-c72df68",
       "date": "2026-11-11T10:23:44.000Z",
       "issue": 8
+    },
+    "anon:lukas test|bossRush-easy|0.4": {
+      "player": "anon:lukas test",
+      "mode": "bossRush-easy",
+      "version": "0.4.0",
+      "score": 20,
+      "wave": 1,
+      "kills": 2,
+      "bosses": 0,
+      "megaboss": false,
+      "time": 20,
+      "earned": 36,
+      "golden": false,
+      "build": "s2-c72df68",
+      "date": "2026-11-11T12:14:48.000Z",
+      "issue": 9
     }
   },
   "processed": [
@@ -167,6 +190,7 @@
     5,
     6,
     7,
-    8
+    8,
+    9
   ]
 }
