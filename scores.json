@@ -1,6 +1,6 @@
 {
   "v": 3,
-  "updated": "2026-11-11T16:43:01.225Z",
+  "updated": "2026-11-11T17:41:45.647Z",
   "players": {
     "asisteus-cell": {
       "name": "asisteus-cell",
@@ -40,9 +40,9 @@
     "anon:johnny": {
       "name": "Johnny",
       "anon": true,
-      "achievements": 17,
-      "runs": 1,
-      "last": "2026-11-11T10:23:44.000Z"
+      "achievements": 34,
+      "runs": 2,
+      "last": "2026-11-11T17:41:32.000Z"
     },
     "anon:lukas test": {
       "name": "lukas test",
@@ -203,6 +203,22 @@
       "build": "s2-078970e",
       "date": "2026-11-11T16:42:44.000Z",
       "issue": 10
+    },
+    "anon:johnny|endless-hard|0.4": {
+      "player": "anon:johnny",
+      "mode": "endless-hard",
+      "version": "0.4.0",
+      "score": 24810,
+      "wave": 35,
+      "kills": 965,
+      "bosses": 6,
+      "megaboss": true,
+      "time": 3419,
+      "earned": 107433,
+      "golden": false,
+      "build": "s2-078970e",
+      "date": "2026-11-11T17:41:32.000Z",
+      "issue": 11
     }
   },
   "processed": [
@@ -215,6 +231,7 @@
     7,
     8,
     9,
-    10
+    10,
+    11
   ]
 }
